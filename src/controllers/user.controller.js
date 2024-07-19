@@ -6,7 +6,9 @@ import { User } from "../models/user.models.js";
 const generateTokens = async (userId) => {
     try {
         const user = await User.findById(userId);
+        // console.log(user)
         const accessToken = user.generateAccessToken();
+        console.log("ho gya")
         const refreshToken = user.generateRefreshToken();
 
         user.refreshToken = refreshToken;

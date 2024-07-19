@@ -1,6 +1,9 @@
 import mongoose, { Schema } from "mongoose";
 import { Project } from "./project.models.js";
 import { Event } from "./event.models.js";
+import bcrypt from "bcrypt"
+import jwt from "jsonwebtoken";
+
 const userSchema = new Schema({
     username: {
         type: String,
@@ -33,10 +36,10 @@ const userSchema = new Schema({
     },
     registeredEvents: {
         type: [{
-            type:Schema.Types.ObjectId,
-            ref:"Event"
+            type: Schema.Types.ObjectId,
+            ref: "Event"
         }],
-        default: 0,
+        default: [],
     },
     refreshToken: {
         type: String,
@@ -62,13 +65,15 @@ userSchema.methods.generateAccessToken = function () {
     )
 }
 userSchema.methods.generateRefreshToken = function () {
-    return jwt.sign({
-        _id: this._id,
-    },
+    return jwt.sign(
+        {
+            _id: this._id,
+
+        },
         process.env.REFRESH_TOKEN_SECRET,
         {
             expiresIn: process.env.REFRESH_TOKEN_EXPIRY
-        },
+        }
     )
 }
 

@@ -22,7 +22,7 @@ const eventSchema = new Schema({
         type: String,
         required: true,
     },
-    sponsors: {
+    partners: {
         type: [String],
     },
     venue: {
@@ -31,6 +31,7 @@ const eventSchema = new Schema({
     mode: {
         type: String,
         enum: ['Online', 'Offline'],
+        required: true,
     },
     capacity: {
         type: Number,
@@ -50,8 +51,9 @@ const eventSchema = new Schema({
         // community tags
     },
     usersRegistered: {
-        type: Number,
-        default: 0,
+        type: [Schema.Types.ObjectId],
+        ref: "User",
+        default: [],
     },
 
 }, { timestamps: true })
