@@ -44,6 +44,7 @@ const registerUser = asyncHandler(async (req, res) => {
         username: username,
         email: email,
         password: password,
+        points: 10,
     })
 
     console.log("User created : ", newUser);

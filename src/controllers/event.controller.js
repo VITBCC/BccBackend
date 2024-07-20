@@ -12,7 +12,7 @@ const registerEvent = asyncHandler(async (req, res) => {
         throw new ApiError(400, "All fields are required")
     }
 
-    console.log(userId)
+    console.log(userId);
     const user = await User.find({ _id: userId });
 
     if (!user) {
@@ -115,15 +115,17 @@ const userEventRegistration = asyncHandler(async (req, res) => {
     if (checkAlreadyRegistered) {
         throw new ApiError(400, "User already registered");
     }
-    event.usersRegistered.push(userId);
-    event.save({ validateBeforeSave: false });
 
     const checkUserRegisteredEvent = user.registeredEvents.find(id => id.toString() === eventId);
     if (checkUserRegisteredEvent) {
         throw new ApiError(400, "User already registered");
     }
 
+    event.usersRegistered.push(userId);
+    event.save({ validateBeforeSave: false });
+
     user.registeredEvents.push(eventId);
+    user.points = user.points + 30;
     user.save({ validateBeforeSave: false });
 
     res

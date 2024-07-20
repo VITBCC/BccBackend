@@ -22,6 +22,10 @@ const postProjects = asyncHandler(async (req, res) => {
     if (!user) {
         throw new ApiError(404, "User not found");
     }
+    const checkExistingProject = await Project.findOne({ name });
+    if (checkExistingProject) {
+        throw new ApiError(400, "Project already exists");
+    }
 
     let coverImageLocalPath;
     if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
@@ -51,7 +55,7 @@ const postProjects = asyncHandler(async (req, res) => {
     if (!project) {
         throw new ApiError(500, "Internal server error");
     }
-
+    user.points = user.points + 15;
     user.suggestedProjects.push(project._id);
     await user.save();
 
@@ -116,6 +120,7 @@ const enrollInProject = asyncHandler(async (req, res) => {
     project.usersEnrolled.push(userId);
     project.save({ validateBeforeSave: false });
     user.projectsEnrolled.push(projectId);
+    user.points = user.points + 20;
     user.save({ validateBeforeSave: false });
 
     res
@@ -148,6 +153,7 @@ const deRegisterProject = asyncHandler(async (req, res) => {
     project.usersEnrolled.pull(userId);
     project.save({ validateBeforeSave: false });
     user.projectsEnrolled.pull(projectId);
+    user.points = user.points - 20;
     user.save({ validateBeforeSave: false });
     res
         .status(200)
@@ -155,4 +161,4 @@ const deRegisterProject = asyncHandler(async (req, res) => {
 })
 
 
-export { postProjects, getProjects, getParticularProject, enrollInProject ,deRegisterProject};
+export { postProjects, getProjects, getParticularProject, enrollInProject, deRegisterProject };
