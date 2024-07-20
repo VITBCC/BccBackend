@@ -30,14 +30,29 @@ const userSchema = new Schema({
     branch: {
         type: String,
     },
+    avatar: {
+        type: String,
+        default: "",
+    },
     isAdmin: {
         type: Boolean,
         default: false,
+    },
+    points: {
+        type: Number,
+        default: 0,
     },
     registeredEvents: {
         type: [{
             type: Schema.Types.ObjectId,
             ref: "Event"
+        }],
+        default: [],
+    },
+    projectsEnrolled: {
+        type: [{
+            type: Schema.Types.ObjectId,
+            ref: "Project"
         }],
         default: [],
     },

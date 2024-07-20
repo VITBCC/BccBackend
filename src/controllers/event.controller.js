@@ -97,4 +97,39 @@ const getParticularEvent = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, { event }, "Successfully retrieved events"));
 })
 
-export { registerEvent, getAllEvents, getParticularEvent }
+const userEventRegistration = asyncHandler(async (req, res) => {
+    const { eventId, userId } = req.body;
+    if (!eventId || !userId) {
+        throw new ApiError(400, "EventId and userId are required");
+    }
+    const event = await Event.findById(eventId);
+    if (!event) {
+        throw new ApiError(400, "Event not found");
+    }
+    const user = await User.findById(userId);
+    if (!user) {
+        throw new ApiError(400, "User not found");
+    }
+
+    const checkAlreadyRegistered = event.usersRegistered.find(id => id.toString() === userId);
+    if (checkAlreadyRegistered) {
+        throw new ApiError(400, "User already registered");
+    }
+    event.usersRegistered.push(userId);
+    event.save({ validateBeforeSave: false });
+
+    const checkUserRegisteredEvent = user.registeredEvents.find(id => id.toString() === eventId);
+    if (checkUserRegisteredEvent) {
+        throw new ApiError(400, "User already registered");
+    }
+
+    user.registeredEvents.push(eventId);
+    user.save({ validateBeforeSave: false });
+
+    res
+        .status(200)
+        .json(new ApiResponse(200, "Event Registered successfully!"));
+
+})
+
+export { registerEvent, getAllEvents, getParticularEvent, userEventRegistration };

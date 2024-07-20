@@ -73,7 +73,7 @@ const getProjects = asyncHandler(async (req, res) => {
 })
 
 const getParticularProject = asyncHandler(async (req, res) => {
-    const {projectId} = req.params;
+    const { projectId } = req.params;
     if (!projectId) {
         throw new ApiResponse(400, "Project id is required");
     }
@@ -91,5 +91,68 @@ const getParticularProject = asyncHandler(async (req, res) => {
 
 })
 
+const enrollInProject = asyncHandler(async (req, res) => {
+    const { projectId } = req.params;
+    const { userId } = req.body;
+    if (!projectId || !userId) {
+        throw new ApiError(400, "ProjectId and UserId are mandatory");
+    }
+    const project = await Project.findById(projectId);
+    if (!project) {
+        throw new ApiError(404, "Project not found");
+    }
+    const user = await User.findById(userId);
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+    const enrolled = project.usersEnrolled.find(id => id.toString() === userId);
+    if (enrolled) {
+        throw new ApiError(400, "User already enrolled in this project");
+    }
+    const userEnrolledProject = user.projectsEnrolled.find(id => id.toString() === projectId);
+    if (userEnrolledProject) {
+        throw new ApiError(400, "User already enrolled in this project");
+    }
+    project.usersEnrolled.push(userId);
+    project.save({ validateBeforeSave: false });
+    user.projectsEnrolled.push(projectId);
+    user.save({ validateBeforeSave: false });
 
-export { postProjects, getProjects ,getParticularProject};
+    res
+        .status(200)
+        .json(new ApiResponse(200, "Enrolled successfully"))
+})
+
+const deRegisterProject = asyncHandler(async (req, res) => {
+    const { projectId } = req.params;
+    const { userId } = req.body;
+    if (!projectId || !userId) {
+        throw new ApiError(400, "ProjectId and UserId are mandatory");
+    }
+    const project = await Project.findById(projectId);
+    if (!project) {
+        throw new ApiError(404, "Project not found");
+    }
+    const user = await User.findById(userId);
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+    const enrolled = project.usersEnrolled.find(id => id.toString() === userId);
+    if (!enrolled) {
+        throw new ApiError(400, "User not enrolled in this project");
+    }
+    const userEnrolledProject = user.projectsEnrolled.find(id => id.toString() === projectId);
+    if (!userEnrolledProject) {
+        throw new ApiError(400, "User not enrolled in this project");
+    }
+    project.usersEnrolled.pull(userId);
+    project.save({ validateBeforeSave: false });
+    user.projectsEnrolled.pull(projectId);
+    user.save({ validateBeforeSave: false });
+    res
+        .status(200)
+        .json(new ApiResponse(200, "De-Enrolled successfully"));
+})
+
+
+export { postProjects, getProjects, getParticularProject, enrollInProject ,deRegisterProject};

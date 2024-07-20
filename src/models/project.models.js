@@ -7,7 +7,7 @@ const projectSchema = new Schema({
     },
     mentors: {
         type: [String],
-        required : true,
+        required: true,
     },
     description: {
         type: String,
@@ -22,7 +22,14 @@ const projectSchema = new Schema({
     },
     technologies: {
         type: [String],
-        required:true,
+        required: true,
+    },
+    usersEnrolled: {
+        type: [{
+            type: Schema.Types.ObjectId,
+            ref: "User"
+        }],
+        default: [],
     },
     review: {
         type: Boolean,
