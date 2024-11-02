@@ -5,6 +5,7 @@ import userRouter from './routes/user.routes.js'
 import eventRouter from './routes/event.routes.js'
 import projectRouter from './routes/project.routes.js'
 import leaderboardRouter from './routes/leaderboard.routes.js'
+
 const app = express();
 
 
@@ -28,6 +29,5 @@ app.use(express.static("public"))
 app.use("/api/v1/users", userRouter)
 app.use("/api/v1/events", eventRouter)
 app.use("/api/v1/projects", projectRouter)
-app.use("/api/v1/score" , leaderboardRouter)
-
+app.use("/api/v1/score", leaderboardRouter)
 export { app }

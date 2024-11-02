@@ -20,13 +20,14 @@ const registerEvent = asyncHandler(async (req, res) => {
     }
     console.log(user)
 
+    if (user.isAdmin === false) {
+        throw new ApiError(500, "You are not allowed to perform this action");
+    }
+
     const findExistingEvent = await Event.findOne({ name });
 
     if (findExistingEvent) {
         throw new ApiError(400, "Event already exist");
-    }
-    if (user.isAdmin === false) {
-        throw new ApiError(500, "You are not allowed to perform this action");
     }
 
     if (mode === "Offline") {

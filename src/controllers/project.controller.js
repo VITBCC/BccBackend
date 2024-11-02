@@ -8,64 +8,65 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 const postProjects = asyncHandler(async (req, res) => {
     const { name, mentors, description, technologies, userId } = req.body;
 
-    // if ([name, mentors, description, technologies, userId].some((field) => typeof field !== 'string' || field.trim() === "")) {
-    //     throw new ApiError(400, "All fields are required");
-    // }
-
+    // Validate required fields
     if (!name || !mentors || !description || !technologies || !userId) {
         throw new ApiError(400, "All fields are required");
     }
 
-
+    // Check if user exists
     const user = await User.findById(userId);
-
     if (!user) {
         throw new ApiError(404, "User not found");
     }
+
+    // Check if project already exists
     const checkExistingProject = await Project.findOne({ name });
     if (checkExistingProject) {
         throw new ApiError(400, "Project already exists");
     }
 
+    // Handle file upload
     let coverImageLocalPath;
-    if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
-        coverImageLocalPath = req.files.coverImage[0].path;
+    if (req.files && req.files.coverImage && req.files.coverImage.length > 0) {
+        console.log(req.files);
+        coverImageLocalPath = req.files.coverImage[0].path; // Access the first element of the array
     }
-    console.log(coverImageLocalPath);
 
     if (!coverImageLocalPath) {
         throw new ApiError(400, "Cover image is required");
     }
 
+    // Upload the image to Cloudinary
     const coverImage = await uploadOnCloudinary(coverImageLocalPath);
-
     if (!coverImage) {
         throw new ApiError(500, "Error uploading cover image");
     }
 
-
+    // Create the project with Cloudinary URL
     const project = await Project.create({
         name,
         mentors,
         description,
-        coverImage: coverImage.secure_url,
+        coverImage: coverImage.secure_url, // Store the Cloudinary URL
         technologies,
-    })
+    });
 
     if (!project) {
         throw new ApiError(500, "Internal server error");
     }
-    user.points = user.points + 15;
+
+    // Update user's points and suggested projects
+    user.points += 15;
     user.suggestedProjects.push(project._id);
     await user.save();
 
-    res
-        .status(200)
-        .json(new ApiResponse(200, "Project uploaded successfully."))
-
-})
+    // Send success response
+    res.status(200).json(new ApiResponse(200, "Project uploaded successfully."));
+});
 
 
+
+// if that project is approved by the admins then only it will be displayed
 const getProjects = asyncHandler(async (req, res) => {
     const projects = await Project.find({ review: true });
     if (!projects) {
